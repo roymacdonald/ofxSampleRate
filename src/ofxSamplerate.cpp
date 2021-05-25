@@ -56,7 +56,7 @@ std::size_t ofxSamplerate::changeSpeed(const ofSoundBuffer& inputBuffer, ofSound
 	data.input_frames = inputBuffer.getNumFrames() - start;
 	data.output_frames = outputBuffer.getNumFrames() - output_start;
 	
-	data.src_ratio = speed;
+	data.src_ratio = 1/speed;
 	
 	data.end_of_input = 0;
 	
