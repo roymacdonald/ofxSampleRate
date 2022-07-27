@@ -26,10 +26,19 @@ public:
 	
 	~ofxSamplerate();
 	
+    struct Results{
+        std::size_t inputFramesUsed;
+        std::size_t outputFramesGenerated;
+    };
+    
 	///\ returns the number of frames processed
-	std::size_t changeSpeed(const ofSoundBuffer& inputBuffer, ofSoundBuffer& outputBuffer, float speed, std::size_t start, bool bLoop = true, std::size_t output_start = 0 );
+    Results changeSpeed(const ofSoundBuffer& inputBuffer, ofSoundBuffer& outputBuffer, float speed, std::size_t start, bool bLoop = true, std::size_t output_start = 0 );
 	
+    Results changeSampleRate(const ofSoundBuffer& inputBuffer, ofSoundBuffer& outputBuffer, int newSampleRate);
 	
+    void reset();
+    
+    int getNumChannels(){return _num_channels;}
 private:
 	
 	void init(int num_channels);

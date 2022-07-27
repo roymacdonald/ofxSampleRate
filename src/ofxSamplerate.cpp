@@ -39,12 +39,12 @@ ofxSamplerate::~ofxSamplerate()
 //} SRC_DATA ;
 
 
-std::size_t ofxSamplerate::changeSpeed(const ofSoundBuffer& inputBuffer, ofSoundBuffer& outputBuffer, float speed, std::size_t start, bool bLoop, std::size_t output_start){
+ofxSamplerate::Results ofxSamplerate::changeSpeed(const ofSoundBuffer& inputBuffer, ofSoundBuffer& outputBuffer, float speed, std::size_t start, bool bLoop, std::size_t output_start){
 	if(ofIsFloatEqual(speed, 1.0f)){
 		inputBuffer.copyTo(outputBuffer, outputBuffer.getNumFrames(), inputBuffer.getNumChannels(), start);
-		return outputBuffer.getNumFrames();
+        return {outputBuffer.getNumFrames(),outputBuffer.getNumFrames()};
 	}
-	if(src == nullptr){
+	if(src == nullptr || _num_channels != inputBuffer.getNumChannels()){
 		init(inputBuffer.getNumChannels());
 	}
 
@@ -63,7 +63,7 @@ std::size_t ofxSamplerate::changeSpeed(const ofSoundBuffer& inputBuffer, ofSound
 	int error = src_process(src, &data);
 	if(error != 0){
 		ofLogError("ofxSamplerate::init") << " process failed " << src_strerror(error) ;
-		return 0;
+        return {0,0};
 	}
 	if(bLoop){
 //		input_frames_used,
@@ -71,8 +71,12 @@ std::size_t ofxSamplerate::changeSpeed(const ofSoundBuffer& inputBuffer, ofSound
 			
 		}
 	}
-	
-	return data.input_frames_used;
+
+    ofxSamplerate::Results res;
+    res.inputFramesUsed = data.input_frames_used;
+    res.outputFramesGenerated = data.output_frames_gen;
+    
+    return res;
 	
 }
 
@@ -87,14 +91,35 @@ void ofxSamplerate::init(int num_channels){
 		}
 		_num_channels = num_channels;
 	}
-	if(src != nullptr){
-		src_delete(src);
-		src = nullptr;
-	}
+    reset();
 	int error;
 	src = src_new (_converter_type,  _num_channels, &error) ;
 	if(src == NULL){
 		ofLogError("ofxSamplerate::init") <<  "could not init SRC. Error " << error;
 	}
 		
+}
+
+void ofxSamplerate::reset(){
+    if(src != nullptr){
+        src_delete(src);
+        src = nullptr;
+    }
+}
+
+ofxSamplerate::Results ofxSamplerate::changeSampleRate(const ofSoundBuffer& inputBuffer, ofSoundBuffer& outputBuffer, int newSampleRate){
+    if(newSampleRate == inputBuffer.getSampleRate()){
+//        std::cout << "ofxSamplerate::changeSampleRate just copying\n";
+        inputBuffer.copyTo(outputBuffer, outputBuffer.getNumFrames(), inputBuffer.getNumChannels(), 0);
+        return {outputBuffer.getNumFrames(),outputBuffer.getNumFrames()};
+    }
+    float sampleRatesRatio = float(inputBuffer.getSampleRate()) / newSampleRate;
+    outputBuffer.allocate(inputBuffer.getNumFrames()/floor(sampleRatesRatio), inputBuffer.getNumChannels());
+//    std::cout << "sampleRatesRatio: " << sampleRatesRatio <<"\n";
+    auto usedSamples = changeSpeed(inputBuffer, outputBuffer, sampleRatesRatio, 0,false, 0);
+//    std::cout << "outputFramesGenerated: " << usedSamples.outputFramesGenerated << " outputbuff frames: " << inputBuffer.getNumFrames()/floor(sampleRatesRatio) << "  numChans: " << outputBuffer.getNumChannels() <<"\n";
+    outputBuffer.resize(usedSamples.outputFramesGenerated * inputBuffer.getNumChannels());
+    outputBuffer.setSampleRate(newSampleRate);
+    
+    return usedSamples;
 }
