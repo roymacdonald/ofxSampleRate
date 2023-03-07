@@ -88,9 +88,10 @@ linux64:
 	# pkg-config
 	# ADDON_PKG_CONFIG_LIBRARIES =
 vs:
+	ADDON_LIBS = libs/libsamplerate/lib/vs/samplerate.lib
 	# After compiling copy the following dynamic libraries to the executable directory
 	# only windows visual studio
-	# ADDON_DLLS_TO_COPY = 
+	ADDON_DLLS_TO_COPY = libs/libsamplerate/lib/vs/samplerate.dll
 	
 linuxarmv6l:
 linuxarmv7l:
