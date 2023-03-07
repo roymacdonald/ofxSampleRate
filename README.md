@@ -5,5 +5,8 @@ openFrameworks addon for changing the speed or samplerate of ofSoundBuffer insta
 Uses [libsamplerate](https://github.com/libsndfile/libsamplerate) to perform the resampling.
 
 
-## Compatibility
-Currently only the macos compiled library of libsamplerate is included with this addon. If you want to use on another OS, please add the appropriate pre compiled static library to the `libs/libsamplerate/lib/<your system type>` folder.
+## Install
+Please run the `build_lib.sh` in order to build libsamplerate for your system.
+You only need to run successfully this script once.
+
+Once it succeds please update with Project Generator the projects that use ofxSampleRate.

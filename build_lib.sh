@@ -11,6 +11,11 @@ check_make_dir(){
 	fi
 }
 
+copy_lib_to(){
+	check_make_dir libs/libsamplerate/lib/"$1"
+	cp libsamplerate/build/install/lib/"$2" libs/libsamplerate/lib/"$1"/	
+	echo "copying libsamplerate/build/install/lib/$2 -> libs/libsamplerate/lib/$1/$2"
+}
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $SCRIPT_DIR	
@@ -58,13 +63,28 @@ check_make_dir libs/libsamplerate/lib/
 
 cp libsamplerate/build/install/include/samplerate.h libs/libsamplerate/include/
 if [[ "$OSTYPE" =~ ^msys ]]; then
-	check_make_dir libs/libsamplerate/lib/vs/
-	cp libsamplerate/build/install/lib/libsamplerate.lib libs/libsamplerate/lib/vs/
+	copy_lib_to vs libsamplerate.lib
+	# check_make_dir libs/libsamplerate/lib/vs/
+	# cp libsamplerate/build/install/lib/libsamplerate.lib libs/libsamplerate/lib/vs/
 fi	
 if [[ "$OSTYPE" =~ ^darwin ]]; then
-	check_make_dir libs/libsamplerate/lib/osx/
-	cp libsamplerate/build/install/lib/libsamplerate.a libs/libsamplerate/lib/osx/
+	copy_lib_to osx libsamplerate.a
+	# check_make_dir libs/libsamplerate/lib/osx/
+	# cp libsamplerate/build/install/lib/libsamplerate.a libs/libsamplerate/lib/osx/
 fi
+
+if [[ "$OSTYPE" =~ ^linux ]]; then
+	if [[ "$HOSTTYPE" =~ ^x86_64 ]]; then
+		copy_lib_to linux64 libsamplerate.a
+		# check_make_dir libs/libsamplerate/lib/linux64/
+		# cp libsamplerate/build/install/lib/libsamplerate.a libs/libsamplerate/lib/linux64/
+	else
+		copy_lib_to linux libsamplerate.a
+		# check_make_dir libs/libsamplerate/lib/linux/
+		# cp libsamplerate/build/install/lib/libsamplerate.a libs/libsamplerate/lib/linux/
+	fi
+fi
+
 
 if [ $? -ne 0 ];then
 	echo -e "${YELL}Installing libsamplerate FAILED!. Exiting${NC}"
