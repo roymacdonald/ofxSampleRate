@@ -22,10 +22,8 @@ cd $SCRIPT_DIR
 
 
 if ! command -v cmake &>/dev/null; then
-      	echo -e "${RED}     You need to install CMake in order to compile whisper.cpp.     ${NC}"
+    echo -e "${RED}     You need to install CMake in order to compile libsamplerate.     ${NC}"
 	echo -e "${RED}     Download the installer from https://cmake.org/download/      ${NC}"
-	echo -e "${RED}     On windows, make sure you use the MSI installer rather than the zip      ${NC}"
-	echo -e "${RED}     and choose \"Add CMake to the system PATH for all users\"      ${NC}"
 	echo -e "${RED}     Exiting now!      ${NC}"
 	exit 1
 fi
