@@ -9,8 +9,6 @@
 #include "ofLog.h"
 #include "ofMath.h"
 
-//src_new (int converter_type, int channels, int *error) ;
-
 
 ofxSamplerate::ofxSamplerate(int converter_type):
 	_converter_type(converter_type)
@@ -25,19 +23,6 @@ ofxSamplerate::~ofxSamplerate()
 		src = nullptr;
 	}
 }
-
-//typedef struct
-//{   const float  *data_in;
-//	float *data_out;
-//
-//	long   input_frames, output_frames ;
-//	long   input_frames_used, output_frames_gen ;
-//
-//	int    end_of_input ;
-//
-//	double src_ratio ;
-//} SRC_DATA ;
-
 
 ofxSamplerate::Results ofxSamplerate::changeSpeed(const ofSoundBuffer& inputBuffer, ofSoundBuffer& outputBuffer, float speed, std::size_t start, bool bLoop, std::size_t output_start){
 	if(ofIsFloatEqual(speed, 1.0f)){
@@ -109,17 +94,18 @@ void ofxSamplerate::reset(){
 
 ofxSamplerate::Results ofxSamplerate::changeSampleRate(const ofSoundBuffer& inputBuffer, ofSoundBuffer& outputBuffer, int newSampleRate){
     if(newSampleRate == inputBuffer.getSampleRate()){
-//        std::cout << "ofxSamplerate::changeSampleRate just copying\n";
-        inputBuffer.copyTo(outputBuffer, outputBuffer.getNumFrames(), inputBuffer.getNumChannels(), 0);
-        return {outputBuffer.getNumFrames(),outputBuffer.getNumFrames()};
+//        inputBuffer.copyTo(outputBuffer, inputBuffer.getNumFrames(), inputBuffer.getNumChannels(), 0);
+//        outputBuffer.setSampleRate(newSampleRate);
+        outputBuffer = inputBuffer;
+        return {inputBuffer.getNumFrames(),inputBuffer.getNumFrames()};
     }
     float sampleRatesRatio = float(inputBuffer.getSampleRate()) / newSampleRate;
-    outputBuffer.allocate(inputBuffer.getNumFrames()/floor(sampleRatesRatio), inputBuffer.getNumChannels());
-//    std::cout << "sampleRatesRatio: " << sampleRatesRatio <<"\n";
+    outputBuffer.allocate(ceil(inputBuffer.getNumFrames()/sampleRatesRatio), inputBuffer.getNumChannels());
     auto usedSamples = changeSpeed(inputBuffer, outputBuffer, sampleRatesRatio, 0,false, 0);
-//    std::cout << "outputFramesGenerated: " << usedSamples.outputFramesGenerated << " outputbuff frames: " << inputBuffer.getNumFrames()/floor(sampleRatesRatio) << "  numChans: " << outputBuffer.getNumChannels() <<"\n";
     outputBuffer.resize(usedSamples.outputFramesGenerated * inputBuffer.getNumChannels());
     outputBuffer.setSampleRate(newSampleRate);
+    outputBuffer.setDeviceID(inputBuffer.getDeviceID());
+    outputBuffer.setTickCount(inputBuffer.getTickCount());
     
     return usedSamples;
 }
